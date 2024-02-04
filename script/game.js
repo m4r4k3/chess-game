@@ -16,6 +16,7 @@ let piecesData = [
 class Game {
     constructor() {
         this.turn = 0;
+        this.playable = null;
         this.pieces = piecesData.flatMap((element) => {
             let elementToReturn = [];
             if (element.count == 1) {
@@ -71,9 +72,6 @@ class Game {
                 return arrayToReturn;
             }
         );
-        this.initializeBoard();
-    }
-    initializeBoard() {
         document
             .querySelectorAll(".cell")
             .forEach(
@@ -82,12 +80,19 @@ class Game {
                         (e.id % 2 == 0 && e.parentElement.id % 2 != 0)) &&
                     e.classList.add("blackCell")
             );
-        this.pieces.forEach((elm) => {
-            document.querySelector(`.row[id='${elm.pos[0] + 1}'] .cell[id='${elm.pos[1] + 1}']`).innerHTML = `<img src="../images/${elm.img}" class="piece" id="${elm.id}"/>`
-        })
-        document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("click", () => this.returnAv(elm.id)))
-        this.pieces.forEach(arr => this.setPlaceAsFull(arr.pos))
+        this.initializeBoard();
     }
+    initializeBoard() {
+        document.querySelectorAll(".cell").forEach(elm => {elm.addEventListener("dragover", (e) => { e.preventDefault()}) ; elm.innerHTML =""})
+        this.pieces.forEach((elm) => {
+            document.querySelector(`.row[id='${elm.pos[0] + 1}'] .cell[id='${elm.pos[1] + 1}']`).innerHTML = ` <img class="piece" id="${elm.id}" draggable="true" src="../images/${elm.img}"/>`
+        })
+        document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragstart", (e) => { this.returnAv(elm.id); e.dataTransfer.clearData(); e.dataTransfer.setData("text/plain", elm.id) }))
+        document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragend", () => document.querySelectorAll(".cell").forEach(elm => { elm.style = ""; elm.classList.remove("playable") })))
+        this.pieces.forEach(arr => this.setPlaceAsFull(arr.pos, { isWhite: arr.isWhite, id: arr.id }))
+        document.querySelectorAll(".cell").forEach(elmt => elmt.addEventListener("drop", (event) => this.piecePlay(event)))
+    }
+
     returnAv(id) {
         let item = this.pieces.find(e => e.id == id)
         let returnedValue = [];
@@ -99,7 +104,6 @@ class Game {
         let rightBottomSideFull = false;
         let rightFull = false;
         let leftFull = false;
-        console.log(item)
         switch (item.type) {
             case 0:
                 returnedValue.push(
@@ -116,13 +120,13 @@ class Game {
                 break;
             case 1:
 
-                for (let i = 0; i < 8; i++) {
+                for (let i = 1; i < 8; i++) {
                     if (!leftTopSideFull) {
                         returnedValue.push(
                             [item.pos[0] - i, item.pos[1] - i],
                         )
                         try {
-                            if (this.board[item.pos[0] - i - 1][item.pos[1] - i - 1].occupied) {
+                            if (this.board[item.pos[0] - i][item.pos[1] - i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -134,7 +138,7 @@ class Game {
                             [item.pos[0] - i, item.pos[1] + i],
                         )
                         try {
-                            if (this.board[item.pos[0] - i - 1][item.pos[1] + i + 1].occupied) {
+                            if (this.board[item.pos[0] - i][item.pos[1] + i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -146,7 +150,7 @@ class Game {
                             [item.pos[0], item.pos[1] - i],
                         )
                         try {
-                            if (this.board[item.pos[0]][item.pos[1] - i - 1].occupied) {
+                            if (this.board[item.pos[0]][item.pos[1] - i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -159,7 +163,7 @@ class Game {
                             [item.pos[0], item.pos[1] + i],
                         )
                         try {
-                            if (this.board[item.pos[0]][item.pos[1] + i + 1].occupied) {
+                            if (this.board[item.pos[0]][item.pos[1] + i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -172,7 +176,7 @@ class Game {
                             [item.pos[0] + i, item.pos[1] + i],
                         )
                         try {
-                            if (this.board[item.pos[0] + i + 1][item.pos[1] + i + 1].occupied) {
+                            if (this.board[item.pos[0] + i][item.pos[1] + i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -184,7 +188,7 @@ class Game {
                             [item.pos[0] + i, item.pos[1] - i],
                         )
                         try {
-                            if (this.board[item.pos[0] + i + 1][item.pos[1] - i - 1].occupied) {
+                            if (this.board[item.pos[0] + i][item.pos[1] - i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -195,7 +199,7 @@ class Game {
                             [item.pos[0] - i, item.pos[1]],
                         )
                         try {
-                            if (this.board[item.pos[0] - i - 1][item.pos[1]].occupied) {
+                            if (this.board[item.pos[0] - i][item.pos[1]].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -206,7 +210,7 @@ class Game {
                             [item.pos[0] + i, item.pos[1]],
                         )
                         try {
-                            if (this.board[item.pos[0] + i + 1][item.pos[1] ].occupied) {
+                            if (this.board[item.pos[0] + i][item.pos[1]].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -234,7 +238,7 @@ class Game {
                             [item.pos[0] - i, item.pos[1] - i],
                         )
                         try {
-                            if (this.board[item.pos[0] - i - 1][item.pos[1] - i - 1].occupied) {
+                            if (this.board[item.pos[0] - i][item.pos[1] - i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -246,7 +250,7 @@ class Game {
                             [item.pos[0] - i, item.pos[1] + i],
                         )
                         try {
-                            if (this.board[item.pos[0] - i - 1][item.pos[1] + i + 1].occupied) {
+                            if (this.board[item.pos[0] - i][item.pos[1] + i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -258,7 +262,7 @@ class Game {
                             [item.pos[0] + i, item.pos[1] + i],
                         )
                         try {
-                            if (this.board[item.pos[0] + i + 1][item.pos[1] + i + 1].occupied) {
+                            if (this.board[item.pos[0] + i][item.pos[1] + i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -270,7 +274,7 @@ class Game {
                             [item.pos[0] + i, item.pos[1] - i],
                         )
                         try {
-                            if (this.board[item.pos[0] + i + 1][item.pos[1] - i - 1].occupied) {
+                            if (this.board[item.pos[0] + i][item.pos[1] - i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -280,13 +284,13 @@ class Game {
                 }
                 break;
             case 4:
-                for (let i = 0; i < 8; i++) {
+                for (let i = 1; i < 8; i++) {
                     if (!topFull) {
                         returnedValue.push(
                             [item.pos[0], item.pos[1] - i],
                         )
                         try {
-                            if (this.board[item.pos[0]][item.pos[1] - i - 1].occupied) {
+                            if (this.board[item.pos[0]][item.pos[1] - i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -298,7 +302,7 @@ class Game {
                             [item.pos[0], item.pos[1] + i],
                         )
                         try {
-                            if (this.board[item.pos[0]][item.pos[1] + i + 1].occupied) {
+                            if (this.board[item.pos[0]][item.pos[1] + i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -310,7 +314,7 @@ class Game {
                             [item.pos[0] - i, item.pos[1]],
                         )
                         try {
-                            if (this.board[item.pos[0] - i - 1][item.pos[1]].occupied) {
+                            if (this.board[item.pos[0] - i][item.pos[1]].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -321,7 +325,7 @@ class Game {
                             [item.pos[0] + i, item.pos[1]],
                         )
                         try {
-                            if (this.board[item.pos[0] + i + 1][item.pos[1] + i + 1].occupied) {
+                            if (this.board[item.pos[0] + i][item.pos[1] + i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -334,18 +338,32 @@ class Game {
                 returnedValue.push(
                     [item.pos[0], item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1]
                 )
-                if (!item.firstMove && !this.board[item.pos[0]][ item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied ) {
+                if (!item.firstMove && !this.board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied) {
                     returnedValue.push(
                         [item.pos[0], item.isWhite ? item.pos[1] - 2 : item.pos[1] + 2]
                     )
                 }
                 break;
         }
-        let filterdValue = returnedValue.filter(itm => 0 <= itm[0] && itm[0] <= 7 && 0 <= itm[1] && itm[1] <= 7 && !(this.board[itm[0]][itm[1]].occupied));
-        filterdValue.forEach(elm => document.querySelector(`.row[id="${elm[0] + 1}"] .cell[id="${elm[1] + 1}"]`).style = "box-shadow: 0 0 10px black inset")
+        let filterdValue = returnedValue.filter(itm => 0 <= itm[0] && itm[0] <= 7 && 0 <= itm[1] && itm[1] <= 7 && !(this.board[itm[0]][itm[1]].occupied && this.board[itm[0]][itm[1]].piece.isWhite == item.isWhite));
+        let namnamValues = filterdValue.filter(itm => this.board[itm[0]][itm[1]].occupied)
+        filterdValue.forEach(elm => !namnamValues.find(felm => elm[0] == felm[0] && elm[1] == felm[1]) && document.querySelector(`.row[id="${elm[0] + 1}"] .cell[id="${elm[1] + 1}"]`).classList.add("playable"))
+        namnamValues.forEach(elm => document.querySelector(`.row[id="${elm[0] + 1}"] .cell[id="${elm[1] + 1}"]`).style = "background-color:red")
+        this.playable = filterdValue;
     }
-    setPlaceAsFull(arr) {
+    setPlaceAsFull(arr, piece) {
         this.board[arr[0]][arr[1]].occupied = true
+        this.board[arr[0]][arr[1]].piece = piece
+    }
+    piecePlay(event) {
+        const target = event.target
+        const pos = [target.parentElement.id - 1, target.id - 1]
+        const pieceInd = this.pieces.findIndex(elm => elm.id == event.dataTransfer.getData("text"))
+       
+        if (this.playable.findIndex((elm) => elm[1] == pos[1] && elm[0] == pos[0])) {
+            this.pieces[pieceInd].pos = pos;
+        }
+        this.initializeBoard()
     }
 }
 

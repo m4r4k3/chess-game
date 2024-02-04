@@ -28,6 +28,11 @@ body{
     display: grid;
     place-content: center;
     height:calc( var(--size) / 8) ;
+    box-shadow: 0 0 10px  inset  black;
+}
+.cell img{
+    width: 99%;
+    height: 99%;
 }
 .blackCell{
     background-color: #D28743;
@@ -35,4 +40,17 @@ body{
 .piece{
     cursor:grab;
     user-select: none;
+}
+.playable{
+    position: relative;
+}
+.playable::after{
+    content: "";
+    display: block;
+    width: 10px;
+    height: 10px;
+    background-color: rgba(157, 255, 234, 0.788);
+    border-radius: 50%;
+    left: calc(50% - 30px);
+    top: calc(50% - 30px);
 }
