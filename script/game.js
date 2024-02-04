@@ -360,7 +360,7 @@ class Game {
         const pos = [target.parentElement.id - 1, target.id - 1]
         const pieceInd = this.pieces.findIndex(elm => elm.id == event.dataTransfer.getData("text"))
        
-        if (this.playable.findIndex((elm) => elm[1] == pos[1] && elm[0] == pos[0])) {
+        if (this.playable.find((elm) => elm[1] == pos[1] && elm[0] == pos[0])) {
             this.pieces[pieceInd].pos = pos;
         }
         this.initializeBoard()
