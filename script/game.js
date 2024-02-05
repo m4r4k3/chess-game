@@ -356,13 +356,21 @@ class Game {
         this.board[arr[0]][arr[1]].piece = piece
     }
     piecePlay(event) {
-        const target = event.target
+        const target = event.target.classList[0] == "piece" ? event.target.parentElement :event.target ;
         const pos = [target.parentElement.id - 1, target.id - 1]
         const pieceInd = this.pieces.findIndex(elm => elm.id == event.dataTransfer.getData("text"))
-       
-        if (this.playable.find((elm) => elm[1] == pos[1] && elm[0] == pos[0])) {
+        if (this.playable.find((elm) => elm[1] == pos[1] && elm[0] == pos[0]) ) {
+            if(this.board[pos[0]][pos[1]].occupied){
+                const eatenPiece = this.pieces.findIndex(elm=>elm.pos[0] == pos[0] && elm.pos[1] == pos[1])
+                this.pieces.splice(eatenPiece , 1)
+            }
+            const piecePos = this.pieces[pieceInd].pos ;
             this.pieces[pieceInd].pos = pos;
-        }
+            this.board[piecePos[0]][piecePos[1]] = {
+                occupied:false ,
+                piece:null
+            }         
+            }
         this.initializeBoard()
     }
 }
