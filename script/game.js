@@ -85,11 +85,13 @@ class Game {
     initializeBoard() {
         document.querySelectorAll(".cell").forEach(elm => {elm.addEventListener("dragover", (e) => { e.preventDefault()}) ; elm.innerHTML =""})
         this.pieces.forEach((elm) => {
+           if(elm) {
             document.querySelector(`.row[id='${elm.pos[0] + 1}'] .cell[id='${elm.pos[1] + 1}']`).innerHTML = ` <img class="piece" id="${elm.id}" draggable="true" src="../images/${elm.img}"/>`
+           }
         })
         document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragstart", (e) => { this.returnAv(elm.id); e.dataTransfer.clearData(); e.dataTransfer.setData("text/plain", elm.id) }))
         document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragend", () => document.querySelectorAll(".cell").forEach(elm => { elm.style = ""; elm.classList.remove("playable") })))
-        this.pieces.forEach(arr => this.setPlaceAsFull(arr.pos, { isWhite: arr.isWhite, id: arr.id }))
+        this.pieces.forEach(arr => arr && this.setPlaceAsFull(arr.pos, { isWhite: arr.isWhite, id: arr.id }))
         document.querySelectorAll(".cell").forEach(elmt => elmt.addEventListener("drop", (event) => this.piecePlay(event)))
     }
 
@@ -361,8 +363,9 @@ class Game {
         const pieceInd = this.pieces.findIndex(elm => elm.id == event.dataTransfer.getData("text"))
         if (this.playable.find((elm) => elm[1] == pos[1] && elm[0] == pos[0]) ) {
             if(this.board[pos[0]][pos[1]].occupied){
+                console.log(target , this.board[pos[0]][pos[1]] , pos)
                 const eatenPiece = this.pieces.findIndex(elm=>elm.pos[0] == pos[0] && elm.pos[1] == pos[1])
-                this.pieces.splice(eatenPiece , 1)
+                this.pieces[eatenPiece]=null
             }
             const piecePos = this.pieces[pieceInd].pos ;
             this.pieces[pieceInd].pos = pos;
