@@ -40,6 +40,7 @@ body{
 .piece{
     cursor:grab;
     user-select: none;
+font-size: 30px;
 }
 .playable{
     position: relative;
@@ -53,4 +54,10 @@ body{
     border-radius: 50%;
     left: calc(50% - 30px);
     top: calc(50% - 30px);
+}
+.blackTurn{
+    transform: rotateX(180deg) ;
+}
+.blackTurn .piece{
+    transform: rotateX(180deg) ;
 }
