@@ -1,12 +1,12 @@
 let piecesData = [
     { id: "wk", code: 0, img: "wk.png", isWhite: 1, dpos: [4, 7], count: 1 },
-    { id: "wq", code: 1, img: "wq.png", isWhite: 1, dpos: [3, 5], count: 1 },
+    { id: "wq", code: 1, img: "wq.png", isWhite: 1, dpos: [3, 7], count: 1 },
     { id: "wkn", code: 2, img: "wkn.png", isWhite: 1, dpos: [[1, 7], [6, 7]], count: 2 },
-    { id: "wb", code: 3, img: "wb.png", isWhite: 1, dpos: [[2, 7], [5, 7]], count: 2 },
+    { id: "wb", code: 3, img: "wb.png", isWhite: 1, dpos: [[2, 4], [5, 7]], count: 2 },
     { id: "wr", code: 4, img: "wr.png", isWhite: 1, dpos: [[0, 7], [7, 7]], count: 2 },
     { id: "wp", code: 5, img: "wp.png", isWhite: 1, dpos: 6, count: 8 },
     { id: "b", code: 0, img: "bk.png", isWhite: 0, dpos: [4, 0], count: 1 },
-    { id: "bq", code: 1, img: "bq.png", isWhite: 0, dpos: [4, 4], count: 1 },
+    { id: "bq", code: 1, img: "bq.png", isWhite: 0, dpos: [3, 0], count: 1 },
     { id: "bkn", code: 2, img: "bkn.png", isWhite: 0, dpos: [[1, 0], [6, 0]], count: 2 },
     { id: "bb", code: 3, img: "bb.png", isWhite: 0, dpos: [[2, 0], [5, 0]], count: 2 },
     { id: "br", code: 4, img: "br.png", isWhite: 0, dpos: [[0, 0], [7, 0]], count: 2 },
@@ -36,12 +36,14 @@ class Game {
                     img: element.img,
                     type: element.code,
                     id: `${element.id}1`
+                    , firstMove: 0
                 }, {
                     pos: element.dpos[1],
                     isWhite: element.isWhite,
                     type: element.code,
                     img: element.img,
                     id: `${element.id}2`
+                    , firstMove: 0
                 }
                 )
             } else {
@@ -83,20 +85,26 @@ class Game {
         this.initializeBoard();
     }
     initializeBoard() {
-        document.querySelectorAll(".cell").forEach(elm => {elm.addEventListener("dragover", (e) => { e.preventDefault()}) ; elm.innerHTML =""})
+        document.querySelectorAll(".cell").forEach(elm => { elm.addEventListener("dragover", (e) => { e.preventDefault() }) })
+        document.querySelectorAll(".cell").forEach(elmt => elmt.addEventListener("drop", (event) => { this.piecePlay(event) }))
+        this.update()
+    }
+
+    update() {
+        document.querySelectorAll(".cell").forEach((elm) => elm.innerHTML = "")
         this.pieces.forEach((elm) => {
-           if(elm) {
-            document.querySelector(`.row[id='${elm.pos[0] + 1}'] .cell[id='${elm.pos[1] + 1}']`).innerHTML = ` <img class="piece" id="${elm.id}" draggable="true" src="../images/${elm.img}"/>`
-           }
+            if (elm) {
+                document.querySelector(`.row[id='${elm.pos[0] + 1}'] .cell[id='${elm.pos[1] + 1}']`).innerHTML = ` <img class="piece" id="${elm.id}" draggable="true" src="../images/${elm.img}"/>`
+            }
         })
-        document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragstart", (e) => { this.returnAv(elm.id); e.dataTransfer.clearData(); e.dataTransfer.setData("text/plain", elm.id) }))
         document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragend", () => document.querySelectorAll(".cell").forEach(elm => { elm.style = ""; elm.classList.remove("playable") })))
+        document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragstart", (e) => {if(this.pieces.find(elmnt=>elmnt && elmnt.id ==elm.id)) {this.returnAv(elm.id); e.dataTransfer.clearData(); e.dataTransfer.setData("text/plain", elm.id)} }))
         this.pieces.forEach(arr => arr && this.setPlaceAsFull(arr.pos, { isWhite: arr.isWhite, id: arr.id }))
-        document.querySelectorAll(".cell").forEach(elmt => elmt.addEventListener("drop", (event) => this.piecePlay(event)))
+
     }
 
     returnAv(id) {
-        let item = this.pieces.find(e => e.id == id)
+        let item = this.pieces.find(e => e && e.id == id)
         let returnedValue = [];
         let leftTopSideFull = false;
         let leftBottomSideFull = false;
@@ -234,7 +242,7 @@ class Game {
                 )
                 break;
             case 3:
-                for (let i = 0; i < 8; i++) {
+                for (let i = 1; i < 8; i++) {
                     if (!leftTopSideFull) {
                         returnedValue.push(
                             [item.pos[0] - i, item.pos[1] - i],
@@ -337,10 +345,12 @@ class Game {
                 }
                 break;
             case 5:
-                returnedValue.push(
-                    [item.pos[0], item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1]
-                )
-                if (!item.firstMove && !this.board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied) {
+                if (!this.board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied) {
+                    returnedValue.push(
+                        [item.pos[0], item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1]
+                    )
+                }
+                if (!item.firstMove && !this.board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied && !this.board[item.pos[0]][item.isWhite ? item.pos[1] - 2 : item.pos[1] + 2].occupied) {
                     returnedValue.push(
                         [item.pos[0], item.isWhite ? item.pos[1] - 2 : item.pos[1] + 2]
                     )
@@ -349,32 +359,37 @@ class Game {
         }
         let filterdValue = returnedValue.filter(itm => 0 <= itm[0] && itm[0] <= 7 && 0 <= itm[1] && itm[1] <= 7 && !(this.board[itm[0]][itm[1]].occupied && this.board[itm[0]][itm[1]].piece.isWhite == item.isWhite));
         let namnamValues = filterdValue.filter(itm => this.board[itm[0]][itm[1]].occupied)
+        this.playable = filterdValue;
         filterdValue.forEach(elm => !namnamValues.find(felm => elm[0] == felm[0] && elm[1] == felm[1]) && document.querySelector(`.row[id="${elm[0] + 1}"] .cell[id="${elm[1] + 1}"]`).classList.add("playable"))
         namnamValues.forEach(elm => document.querySelector(`.row[id="${elm[0] + 1}"] .cell[id="${elm[1] + 1}"]`).style = "background-color:red")
-        this.playable = filterdValue;
     }
     setPlaceAsFull(arr, piece) {
         this.board[arr[0]][arr[1]].occupied = true
         this.board[arr[0]][arr[1]].piece = piece
     }
     piecePlay(event) {
-        const target = event.target.classList[0] == "piece" ? event.target.parentElement :event.target ;
+        const target = event.target.classList[0] == "piece" ? event.target.parentElement : event.target;
         const pos = [target.parentElement.id - 1, target.id - 1]
-        const pieceInd = this.pieces.findIndex(elm => elm.id == event.dataTransfer.getData("text"))
-        if (this.playable.find((elm) => elm[1] == pos[1] && elm[0] == pos[0]) ) {
-            if(this.board[pos[0]][pos[1]].occupied){
-                console.log(target , this.board[pos[0]][pos[1]] , pos)
-                const eatenPiece = this.pieces.findIndex(elm=>elm.pos[0] == pos[0] && elm.pos[1] == pos[1])
-                this.pieces[eatenPiece]=null
+        const pieceInd = this.pieces.findIndex(elm =>elm && elm.id == event.dataTransfer.getData("text"))
+
+        if (this.playable.find((elm) =>elm &&  elm[1] == pos[1] && elm[0] == pos[0])) {
+            if (this.board[pos[0]][pos[1]].occupied) {
+                console.log(this.pieces)
+                const eatenPiece = this.pieces.findIndex(elm => elm && elm.pos[0] == pos[0] && elm.pos[1] == pos[1])
+                this.pieces[eatenPiece] = null
             }
-            const piecePos = this.pieces[pieceInd].pos ;
+            const piecePos = this.pieces[pieceInd].pos;
             this.pieces[pieceInd].pos = pos;
             this.board[piecePos[0]][piecePos[1]] = {
-                occupied:false ,
-                piece:null
-            }         
+                occupied: false,
+                piece: null
             }
-        this.initializeBoard()
+            if (!this.pieces[pieceInd].firstMove) {
+                this.pieces[pieceInd].firstMove = 1
+            }
+
+        }
+        this.update()
     }
 }
 
