@@ -1,8 +1,8 @@
 let piecesData = [
     { id: "wk", code: 0, img: "wk.png", isWhite: 1, dpos: [4, 7], count: 1 },
-    { id: "wq", code: 1, img: "wq.png", isWhite: 1, dpos: [3, 5], count: 1 },
-    { id: "wkn", code: 2, img: "wkn.png", isWhite: 1, dpos: [[1, 5], [6, 5]], count: 2 },
-    { id: "wb", code: 3, img: "wb.png", isWhite: 1, dpos: [[2, 5], [5, 5]], count: 2 },
+    { id: "wq", code: 1, img: "wq.png", isWhite: 1, dpos: [3, 7], count: 1 },
+    { id: "wkn", code: 2, img: "wkn.png", isWhite: 1, dpos: [[1, 7], [6, 7]], count: 2 },
+    { id: "wb", code: 3, img: "wb.png", isWhite: 1, dpos: [[2, 7], [5, 7]], count: 2 },
     { id: "wr", code: 4, img: "wr.png", isWhite: 1, dpos: [[0, 7], [7, 7]], count: 2 },
     { id: "wp", code: 5, img: "wp.png", isWhite: 1, dpos: 6, count: 8 },
     { id: "b", code: 0, img: "bk.png", isWhite: 0, dpos: [4, 0], count: 1 },
@@ -101,9 +101,9 @@ class Game {
         document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragend", () => document.querySelectorAll(".cell").forEach(elm => { elm.style = ""; elm.classList.remove("playable") })))
         document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragstart", (e) => { if (this.pieces.find(elmnt => elmnt && elmnt.id == elm.id && elmnt.isWhite === this.isWhiteTurn)) { this.returnAv(elm.id); e.dataTransfer.clearData(); e.dataTransfer.setData("text/plain", elm.id) } }))
         this.pieces.forEach(arr => arr && this.setPlaceAsFull(arr.pos, { isWhite: arr.isWhite, id: arr.id }))
-        if(this.isWhiteTurn){
+        if (this.isWhiteTurn) {
             document.querySelector(".board").classList.remove("blackTurn")
-        }else{
+        } else {
             document.querySelector(".board").classList.add("blackTurn")
         }
     }
@@ -132,6 +132,24 @@ class Game {
                     [item.pos[0], item.pos[1] - 1]
 
                 )
+                let castleLeft = true;
+                let castleRight = true;
+                let rightRook = this.pieces.find(elm =>elm && elm.id == `${item.isWhite ? "w" : "b"}r2`);
+                let leftRook = this.pieces.find(elm => elm && elm.id == `${item.isWhite ? "w" : "b"}r1`);
+                for (let i = 1; i < 7; i++) {
+                    if ((this.board[i][item.pos[1]].occupied && i < item.pos[0]) || (leftRook.firstMove) || item.firstMove) {
+                        castleLeft = false
+                    }
+                    if ((this.board[i][item.pos[1]].occupied && i > item.pos[0]) || (rightRook.firstMove) || item.firstMove) {
+                        castleRight = false
+                    }
+                }
+                if (castleRight) {
+                    returnedValue.push([item.pos[0] + 2, item.pos[1]])
+                }
+                if (castleLeft) {
+                    returnedValue.push([item.pos[0] - 2, item.pos[1]])
+                }
                 break;
             case 1:
 
@@ -340,7 +358,7 @@ class Game {
                             [item.pos[0] + i, item.pos[1]],
                         )
                         try {
-                            if (this.board[item.pos[0] + i][item.pos[1] + i].occupied) {
+                            if (this.board[item.pos[0] + i][item.pos[1]].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -360,15 +378,15 @@ class Game {
                         [item.pos[0], item.isWhite ? item.pos[1] - 2 : item.pos[1] + 2]
                     )
                 }
-                if(item.isWhite == 1){
-               
+                if (item.isWhite == 1) {
+
                     returnedValue.push
-                    (( item.pos[0] <= 6 && this.board[item.pos[0] +1] [item.pos[1]-1].occupied  && [item.pos[0] +1 , item.pos[1] -1] ), 
-                    (item.pos[0] >= 1 && this.board[item.pos[0] -1] [item.pos[1]-1].occupied  && [item.pos[0] -1 , item.pos[1]-1]))
-                }else{
+                        ((item.pos[0] <= 6 && this.board[item.pos[0] + 1][item.pos[1] - 1].occupied && [item.pos[0] + 1, item.pos[1] - 1]),
+                            (item.pos[0] >= 1 && this.board[item.pos[0] - 1][item.pos[1] - 1].occupied && [item.pos[0] - 1, item.pos[1] - 1]))
+                } else {
                     returnedValue.push
-                    (( item.pos[0] <= 6 && this.board[item.pos[0] +1] [item.pos[1]+1].occupied  && [item.pos[0] +1 , item.pos[1]+1]  ), 
-                    (item.pos[0] >= 1 && this.board[item.pos[0] -1] [item.pos[1]+1].occupied  && [item.pos[0] -1 , item.pos[1]+1]))
+                        ((item.pos[0] <= 6 && this.board[item.pos[0] + 1][item.pos[1] + 1].occupied && [item.pos[0] + 1, item.pos[1] + 1]),
+                            (item.pos[0] >= 1 && this.board[item.pos[0] - 1][item.pos[1] + 1].occupied && [item.pos[0] - 1, item.pos[1] + 1]))
                 }
                 break;
         }
@@ -386,30 +404,37 @@ class Game {
         const target = event.target.classList[0] == "piece" ? event.target.parentElement : event.target;
         const pos = [target.parentElement.id - 1, target.id - 1]
         const pieceInd = this.pieces.findIndex(elm => elm && elm.id == event.dataTransfer.getData("text"))
-
+        const piece = this.pieces[pieceInd]
         if (this.playable && this.playable.find((elm) => elm && elm[1] == pos[1] && elm[0] == pos[0])) {
-            if (this.board[pos[0]][pos[1]].occupied) {
-                const eatenPiece = this.pieces.findIndex(elm => elm && elm.pos[0] == pos[0] && elm.pos[1] == pos[1])
-                this.pieces[eatenPiece] = null
+            if (piece.type == 0 && pos[1] == piece.pos[1] && -2 == piece.pos[0] - pos[0] || piece.pos[0] - pos[0] == 2) {
+                if (piece.pos[0] - pos[0] == -2) {
+                    let rook = this.pieces.find(elm => elm && elm.id == `${piece.isWhite ? "w" : "b"}r2`)
+                    this.movePiece(rook, [rook.pos[0] - 2, rook.pos[1]])
+                } else {
+                    let rook = this.pieces.find(elm => elm && elm.id == `${piece.isWhite ? "w" : "b"}r1`)
+                    this.movePiece(rook, [rook.pos[0] + 3, rook.pos[1]])
+                }
+                this.movePiece(piece, pos)
+            } else {
+                if (this.board[pos[0]][pos[1]].occupied) {
+                    const eatenPiece = this.pieces.findIndex(elm => elm && elm.pos[0] == pos[0] && elm.pos[1] == pos[1])
+                    this.pieces[eatenPiece] = null
+                }
+                this.movePiece(piece, pos)
             }
-            this.movePiece(pieceInd, pos)
+            this.pieces[pieceInd].firstMove = true
+            this.isWhiteTurn = this.isWhiteTurn ? 0 : 1
         }
         this.update()
     }
-    movePiece(pieceInd, pos) {
-        const piecePos = this.pieces[pieceInd].pos;
-        this.pieces[pieceInd].pos = pos;
+    movePiece(piece, pos) {
+        const piecePos = piece.pos;
+        piece.pos = pos;
         this.board[piecePos[0]][piecePos[1]] = {
             occupied: false,
             piece: null
         }
-        if (!this.pieces[pieceInd].firstMove) {
-            this.pieces[pieceInd].firstMove = 1
-        }
-        this.isWhiteTurn = this.isWhiteTurn ? 0 : 1
     }
 }
 
 export default Game;
-
-
