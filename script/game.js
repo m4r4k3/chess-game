@@ -99,7 +99,13 @@ class Game {
             }
         })
         document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragend", () => document.querySelectorAll(".cell").forEach(elm => { elm.style = ""; elm.classList.remove("playable") })))
-        document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragstart", (e) => { if (this.pieces.find(elmnt => elmnt && elmnt.id == elm.id && elmnt.isWhite === this.isWhiteTurn)) { this.playable = this.returnAv(elm.id, "av"); e.dataTransfer.clearData(); e.dataTransfer.setData("text/plain", elm.id) } }))
+        document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragstart", (e) => {
+            if (this.pieces.find(elmnt => elmnt && elmnt.id == elm.id && elmnt.isWhite === this.isWhiteTurn)) {
+                this.playable = this.returnAv(elm.id, "av");
+                e.dataTransfer.clearData();
+                e.dataTransfer.setData("text/plain", elm.id)
+            }
+        }))
         this.pieces.forEach(arr => arr && this.setPlaceAsFull(arr.pos, { isWhite: arr.isWhite, id: arr.id }))
         if (this.isWhiteTurn) {
             document.querySelector(".board").classList.remove("blackTurn")
@@ -152,7 +158,6 @@ class Game {
                 }
                 break;
             case 1:
-
                 for (let i = 1; i < 8; i++) {
                     if (!leftTopSideFull) {
                         returnedValue.push(
@@ -368,31 +373,43 @@ class Game {
                 }
                 break;
             case 5:
-                if (!this.board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied) {
-                    returnedValue.push(
-                        [item.pos[0], item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1]
-                    )
-                }
-                if (!item.firstMove && !this.board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied && !this.board[item.pos[0]][item.isWhite ? item.pos[1] - 2 : item.pos[1] + 2].occupied) {
-                    returnedValue.push(
-                        [item.pos[0], item.isWhite ? item.pos[1] - 2 : item.pos[1] + 2]
-                    )
-                }
-                if (item.isWhite == 1) {
+                if (returnType == "av") {
+                    if (!this.board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied) {
+                        returnedValue.push(
+                            [item.pos[0], item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1]
+                        )
+                    }
+                    if (!item.firstMove && !this.board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied && !this.board[item.pos[0]][item.isWhite ? item.pos[1] - 2 : item.pos[1] + 2].occupied) {
+                        returnedValue.push(
+                            [item.pos[0], item.isWhite ? item.pos[1] - 2 : item.pos[1] + 2]
+                        )
+                    }
+                    if (item.isWhite == 1) {
 
-                    returnedValue.push
-                        ((item.pos[0] <= 6 && this.board[item.pos[0] + 1][item.pos[1] - 1].occupied && [item.pos[0] + 1, item.pos[1] - 1]),
-                            (item.pos[0] >= 1 && this.board[item.pos[0] - 1][item.pos[1] - 1].occupied && [item.pos[0] - 1, item.pos[1] - 1]))
+                        returnedValue.push
+                            ((item.pos[0] <= 6 && this.board[item.pos[0] + 1][item.pos[1] - 1].occupied && [item.pos[0] + 1, item.pos[1] - 1]),
+                                (item.pos[0] >= 1 && this.board[item.pos[0] - 1][item.pos[1] - 1].occupied && [item.pos[0] - 1, item.pos[1] - 1]))
+                    } else {
+                        returnedValue.push
+                            ((item.pos[0] <= 6 && this.board[item.pos[0] + 1][item.pos[1] + 1].occupied && [item.pos[0] + 1, item.pos[1] + 1]),
+                                (item.pos[0] >= 1 && this.board[item.pos[0] - 1][item.pos[1] + 1].occupied && [item.pos[0] - 1, item.pos[1] + 1]))
+                    }
                 } else {
-                    returnedValue.push
-                        ((item.pos[0] <= 6 && this.board[item.pos[0] + 1][item.pos[1] + 1].occupied && [item.pos[0] + 1, item.pos[1] + 1]),
-                            (item.pos[0] >= 1 && this.board[item.pos[0] - 1][item.pos[1] + 1].occupied && [item.pos[0] - 1, item.pos[1] + 1]))
+                    if (item.isWhite == 1) {
+                        returnedValue.push
+                            ((item.pos[0] <= 6 && [item.pos[0] + 1, item.pos[1] - 1]),
+                                (item.pos[0] >= 1 && [item.pos[0] - 1, item.pos[1] - 1]))
+                    } else {
+                        returnedValue.push
+                            ((item.pos[0] <= 6 && [item.pos[0] + 1, item.pos[1] + 1]),
+                                (item.pos[0] >= 1 && [item.pos[0] - 1, item.pos[1] + 1]))
+                    }
                 }
                 break;
         }
 
-        if (item.type == 0 && returnType =="av") {
-            returnedValue = returnedValue.filter((elm) => this.checkKingMoves(item.isWhite, elm).length == 0 )
+        if (item.type == 0 && returnType == "av") {
+            returnedValue = returnedValue.filter((elm) => this.checkKingMoves(item.isWhite, elm).length == 0)
         }
         let filterdValue = returnedValue.filter(itm => 0 <= itm[0] && itm[0] <= 7 && 0 <= itm[1] && itm[1] <= 7 && !(this.board[itm[0]][itm[1]].occupied && this.board[itm[0]][itm[1]].piece.isWhite == item.isWhite));
         let namnamValues = filterdValue.filter(itm => this.board[itm[0]][itm[1]].occupied);
@@ -402,7 +419,7 @@ class Game {
             namnamValues.forEach(elm => document.querySelector(`.row[id="${elm[0] + 1}"] .cell[id="${elm[1] + 1}"]`).style = "background-color:red")
             return filterdValue
         } else {
-            return filterdValue
+            return returnedValue.filter(itm => 0 <= itm[0] && itm[0] <= 7 && 0 <= itm[1] && itm[1] <= 7)
         }
     }
     setPlaceAsFull(arr, piece) {
