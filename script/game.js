@@ -1,12 +1,12 @@
 let piecesData = [
-    { id: "wk", code: 0, img: "wk.png", isWhite: 1, dpos: [4, 7], count: 1 },
+    { id: "wk", code: 0, img: "wk.png", isWhite: 1, dpos: [4, 5], count: 1 },
     { id: "wq", code: 1, img: "wq.png", isWhite: 1, dpos: [3, 7], count: 1 },
     { id: "wkn", code: 2, img: "wkn.png", isWhite: 1, dpos: [[1, 7], [6, 7]], count: 2 },
     { id: "wb", code: 3, img: "wb.png", isWhite: 1, dpos: [[2, 7], [5, 7]], count: 2 },
     { id: "wr", code: 4, img: "wr.png", isWhite: 1, dpos: [[0, 7], [7, 7]], count: 2 },
     { id: "wp", code: 5, img: "wp.png", isWhite: 1, dpos: 6, count: 8 },
-    { id: "b", code: 0, img: "bk.png", isWhite: 0, dpos: [4, 0], count: 1 },
-    { id: "bq", code: 1, img: "bq.png", isWhite: 0, dpos: [3, 0], count: 1 },
+    { id: "bk", code: 0, img: "bk.png", isWhite: 0, dpos: [4, 0], count: 1 },
+    { id: "bq", code: 1, img: "bq.png", isWhite: 0, dpos: [4, 2], count: 1 },
     { id: "bkn", code: 2, img: "bkn.png", isWhite: 0, dpos: [[1, 0], [6, 0]], count: 2 },
     { id: "bb", code: 3, img: "bb.png", isWhite: 0, dpos: [[2, 0], [5, 0]], count: 2 },
     { id: "br", code: 4, img: "br.png", isWhite: 0, dpos: [[0, 0], [7, 0]], count: 2 },
@@ -99,7 +99,7 @@ class Game {
             }
         })
         document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragend", () => document.querySelectorAll(".cell").forEach(elm => { elm.style = ""; elm.classList.remove("playable") })))
-        document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragstart", (e) => { if (this.pieces.find(elmnt => elmnt && elmnt.id == elm.id && elmnt.isWhite === this.isWhiteTurn)) { this.returnAv(elm.id); e.dataTransfer.clearData(); e.dataTransfer.setData("text/plain", elm.id) } }))
+        document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragstart", (e) => { if (this.pieces.find(elmnt => elmnt && elmnt.id == elm.id && elmnt.isWhite === this.isWhiteTurn)) { this.playable = this.returnAv(elm.id, "av"); e.dataTransfer.clearData(); e.dataTransfer.setData("text/plain", elm.id) } }))
         this.pieces.forEach(arr => arr && this.setPlaceAsFull(arr.pos, { isWhite: arr.isWhite, id: arr.id }))
         if (this.isWhiteTurn) {
             document.querySelector(".board").classList.remove("blackTurn")
@@ -108,7 +108,7 @@ class Game {
         }
     }
 
-    returnAv(id) {
+    returnAv(id, returnType) {
         let item = this.pieces.find(e => e && e.id == id)
         let returnedValue = [];
         let leftTopSideFull = false;
@@ -134,7 +134,7 @@ class Game {
                 )
                 let castleLeft = true;
                 let castleRight = true;
-                let rightRook = this.pieces.find(elm =>elm && elm.id == `${item.isWhite ? "w" : "b"}r2`);
+                let rightRook = this.pieces.find(elm => elm && elm.id == `${item.isWhite ? "w" : "b"}r2`);
                 let leftRook = this.pieces.find(elm => elm && elm.id == `${item.isWhite ? "w" : "b"}r1`);
                 for (let i = 1; i < 7; i++) {
                     if ((this.board[i][item.pos[1]].occupied && i < item.pos[0]) || (leftRook.firstMove) || item.firstMove) {
@@ -390,11 +390,20 @@ class Game {
                 }
                 break;
         }
+
+        if (item.type == 0 && returnType =="av") {
+            returnedValue = returnedValue.filter((elm) => this.checkKingMoves(item.isWhite, elm).length == 0 )
+        }
         let filterdValue = returnedValue.filter(itm => 0 <= itm[0] && itm[0] <= 7 && 0 <= itm[1] && itm[1] <= 7 && !(this.board[itm[0]][itm[1]].occupied && this.board[itm[0]][itm[1]].piece.isWhite == item.isWhite));
-        let namnamValues = filterdValue.filter(itm => this.board[itm[0]][itm[1]].occupied)
-        this.playable = filterdValue;
-        filterdValue.forEach(elm => !namnamValues.find(felm => elm[0] == felm[0] && elm[1] == felm[1]) && document.querySelector(`.row[id="${elm[0] + 1}"] .cell[id="${elm[1] + 1}"]`).classList.add("playable"))
-        namnamValues.forEach(elm => document.querySelector(`.row[id="${elm[0] + 1}"] .cell[id="${elm[1] + 1}"]`).style = "background-color:red")
+        let namnamValues = filterdValue.filter(itm => this.board[itm[0]][itm[1]].occupied);
+
+        if (returnType == "av") {
+            filterdValue.forEach(elm => !namnamValues.find(felm => elm[0] == felm[0] && elm[1] == felm[1]) && document.querySelector(`.row[id="${elm[0] + 1}"] .cell[id="${elm[1] + 1}"]`).classList.add("playable"))
+            namnamValues.forEach(elm => document.querySelector(`.row[id="${elm[0] + 1}"] .cell[id="${elm[1] + 1}"]`).style = "background-color:red")
+            return filterdValue
+        } else {
+            return filterdValue
+        }
     }
     setPlaceAsFull(arr, piece) {
         this.board[arr[0]][arr[1]].occupied = true
@@ -434,6 +443,15 @@ class Game {
             occupied: false,
             piece: null
         }
+    }
+    checkKingMoves(isWhite = 1, kingPos = [4, 5]) {
+        const pieces = this.pieces.filter(elm => elm && elm.isWhite != isWhite);
+        let finalResults = [];
+        for (let i of pieces) {
+            let avPoses = this.returnAv(i.id, "nam")
+            finalResults.push(avPoses.filter(posElm => posElm[0] == kingPos[0] && posElm[1] == kingPos[1]))
+        }
+        return finalResults.filter(elment => elment.length > 0)
     }
 }
 
