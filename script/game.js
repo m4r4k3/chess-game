@@ -1,12 +1,12 @@
 let piecesData = [
-    { id: "wk", code: 0, img: "wk.png", isWhite: 1, dpos: [4, 5], count: 1 },
+    { id: "wk", code: 0, img: "wk.png", isWhite: 1, dpos: [3, 4], count: 1 },
     { id: "wq", code: 1, img: "wq.png", isWhite: 1, dpos: [3, 7], count: 1 },
     { id: "wkn", code: 2, img: "wkn.png", isWhite: 1, dpos: [[1, 7], [6, 7]], count: 2 },
     { id: "wb", code: 3, img: "wb.png", isWhite: 1, dpos: [[2, 7], [5, 7]], count: 2 },
     { id: "wr", code: 4, img: "wr.png", isWhite: 1, dpos: [[0, 7], [7, 7]], count: 2 },
     { id: "wp", code: 5, img: "wp.png", isWhite: 1, dpos: 6, count: 8 },
     { id: "bk", code: 0, img: "bk.png", isWhite: 0, dpos: [4, 0], count: 1 },
-    { id: "bq", code: 1, img: "bq.png", isWhite: 0, dpos: [4, 2], count: 1 },
+    { id: "bq", code: 1, img: "bq.png", isWhite: 0, dpos: [5, 2], count: 1 },
     { id: "bkn", code: 2, img: "bkn.png", isWhite: 0, dpos: [[1, 0], [6, 0]], count: 2 },
     { id: "bb", code: 3, img: "bb.png", isWhite: 0, dpos: [[2, 0], [5, 0]], count: 2 },
     { id: "br", code: 4, img: "br.png", isWhite: 0, dpos: [[0, 0], [7, 0]], count: 2 },
@@ -17,6 +17,7 @@ class Game {
     constructor() {
         this.isWhiteTurn = 1;
         this.playable = null;
+        this.check = false;
         this.pieces = piecesData.flatMap((element) => {
             let elementToReturn = [];
             if (element.count == 1) {
@@ -112,10 +113,13 @@ class Game {
         } else {
             document.querySelector(".board").classList.add("blackTurn")
         }
+        if(this.checkKingMoves(this.isWhiteTurn )){
+            this.check= true
+        }
     }
 
-    returnAv(id, returnType) {
-        let item = this.pieces.find(e => e && e.id == id)
+    returnAv(id, returnType, pieces = this.pieces, board = this.board) {
+        let item = pieces.find(e => e && e.id == id)
         let returnedValue = [];
         let leftTopSideFull = false;
         let leftBottomSideFull = false;
@@ -140,13 +144,13 @@ class Game {
                 )
                 let castleLeft = true;
                 let castleRight = true;
-                let rightRook = this.pieces.find(elm => elm && elm.id == `${item.isWhite ? "w" : "b"}r2`);
-                let leftRook = this.pieces.find(elm => elm && elm.id == `${item.isWhite ? "w" : "b"}r1`);
+                let rightRook = pieces.find(elm => elm && elm.id == `${item.isWhite ? "w" : "b"}r2`);
+                let leftRook = pieces.find(elm => elm && elm.id == `${item.isWhite ? "w" : "b"}r1`);
                 for (let i = 1; i < 7; i++) {
-                    if ((this.board[i][item.pos[1]].occupied && i < item.pos[0]) || (leftRook.firstMove) || item.firstMove) {
+                    if ((board[i][item.pos[1]].occupied && i < item.pos[0]) || (leftRook.firstMove) || item.firstMove) {
                         castleLeft = false
                     }
-                    if ((this.board[i][item.pos[1]].occupied && i > item.pos[0]) || (rightRook.firstMove) || item.firstMove) {
+                    if ((board[i][item.pos[1]].occupied && i > item.pos[0]) || (rightRook.firstMove) || item.firstMove) {
                         castleRight = false
                     }
                 }
@@ -164,7 +168,7 @@ class Game {
                             [item.pos[0] - i, item.pos[1] - i],
                         )
                         try {
-                            if (this.board[item.pos[0] - i][item.pos[1] - i].occupied) {
+                            if (board[item.pos[0] - i][item.pos[1] - i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -176,7 +180,7 @@ class Game {
                             [item.pos[0] - i, item.pos[1] + i],
                         )
                         try {
-                            if (this.board[item.pos[0] - i][item.pos[1] + i].occupied) {
+                            if (board[item.pos[0] - i][item.pos[1] + i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -188,7 +192,7 @@ class Game {
                             [item.pos[0], item.pos[1] - i],
                         )
                         try {
-                            if (this.board[item.pos[0]][item.pos[1] - i].occupied) {
+                            if (board[item.pos[0]][item.pos[1] - i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -201,7 +205,7 @@ class Game {
                             [item.pos[0], item.pos[1] + i],
                         )
                         try {
-                            if (this.board[item.pos[0]][item.pos[1] + i].occupied) {
+                            if (board[item.pos[0]][item.pos[1] + i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -214,7 +218,7 @@ class Game {
                             [item.pos[0] + i, item.pos[1] + i],
                         )
                         try {
-                            if (this.board[item.pos[0] + i][item.pos[1] + i].occupied) {
+                            if (board[item.pos[0] + i][item.pos[1] + i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -226,7 +230,7 @@ class Game {
                             [item.pos[0] + i, item.pos[1] - i],
                         )
                         try {
-                            if (this.board[item.pos[0] + i][item.pos[1] - i].occupied) {
+                            if (board[item.pos[0] + i][item.pos[1] - i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -237,7 +241,7 @@ class Game {
                             [item.pos[0] - i, item.pos[1]],
                         )
                         try {
-                            if (this.board[item.pos[0] - i][item.pos[1]].occupied) {
+                            if (board[item.pos[0] - i][item.pos[1]].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -248,7 +252,7 @@ class Game {
                             [item.pos[0] + i, item.pos[1]],
                         )
                         try {
-                            if (this.board[item.pos[0] + i][item.pos[1]].occupied) {
+                            if (board[item.pos[0] + i][item.pos[1]].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -276,7 +280,7 @@ class Game {
                             [item.pos[0] - i, item.pos[1] - i],
                         )
                         try {
-                            if (this.board[item.pos[0] - i][item.pos[1] - i].occupied) {
+                            if (board[item.pos[0] - i][item.pos[1] - i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -288,7 +292,7 @@ class Game {
                             [item.pos[0] - i, item.pos[1] + i],
                         )
                         try {
-                            if (this.board[item.pos[0] - i][item.pos[1] + i].occupied) {
+                            if (board[item.pos[0] - i][item.pos[1] + i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -300,7 +304,7 @@ class Game {
                             [item.pos[0] + i, item.pos[1] + i],
                         )
                         try {
-                            if (this.board[item.pos[0] + i][item.pos[1] + i].occupied) {
+                            if (board[item.pos[0] + i][item.pos[1] + i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -312,7 +316,7 @@ class Game {
                             [item.pos[0] + i, item.pos[1] - i],
                         )
                         try {
-                            if (this.board[item.pos[0] + i][item.pos[1] - i].occupied) {
+                            if (board[item.pos[0] + i][item.pos[1] - i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -328,7 +332,7 @@ class Game {
                             [item.pos[0], item.pos[1] - i],
                         )
                         try {
-                            if (this.board[item.pos[0]][item.pos[1] - i].occupied) {
+                            if (board[item.pos[0]][item.pos[1] - i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -340,7 +344,7 @@ class Game {
                             [item.pos[0], item.pos[1] + i],
                         )
                         try {
-                            if (this.board[item.pos[0]][item.pos[1] + i].occupied) {
+                            if (board[item.pos[0]][item.pos[1] + i].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -352,7 +356,7 @@ class Game {
                             [item.pos[0] - i, item.pos[1]],
                         )
                         try {
-                            if (this.board[item.pos[0] - i][item.pos[1]].occupied) {
+                            if (board[item.pos[0] - i][item.pos[1]].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -363,7 +367,7 @@ class Game {
                             [item.pos[0] + i, item.pos[1]],
                         )
                         try {
-                            if (this.board[item.pos[0] + i][item.pos[1]].occupied) {
+                            if (board[item.pos[0] + i][item.pos[1]].occupied) {
                                 throw ("empty")
                             }
                         } catch {
@@ -374,12 +378,12 @@ class Game {
                 break;
             case 5:
                 if (returnType == "av") {
-                    if (!this.board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied) {
+                    if (!board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied) {
                         returnedValue.push(
                             [item.pos[0], item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1]
                         )
                     }
-                    if (!item.firstMove && !this.board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied && !this.board[item.pos[0]][item.isWhite ? item.pos[1] - 2 : item.pos[1] + 2].occupied) {
+                    if (!item.firstMove && !board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied && !board[item.pos[0]][item.isWhite ? item.pos[1] - 2 : item.pos[1] + 2].occupied) {
                         returnedValue.push(
                             [item.pos[0], item.isWhite ? item.pos[1] - 2 : item.pos[1] + 2]
                         )
@@ -387,12 +391,12 @@ class Game {
                     if (item.isWhite == 1) {
 
                         returnedValue.push
-                            ((item.pos[0] <= 6 && this.board[item.pos[0] + 1][item.pos[1] - 1].occupied && [item.pos[0] + 1, item.pos[1] - 1]),
-                                (item.pos[0] >= 1 && this.board[item.pos[0] - 1][item.pos[1] - 1].occupied && [item.pos[0] - 1, item.pos[1] - 1]))
+                            ((item.pos[0] <= 6 && board[item.pos[0] + 1][item.pos[1] - 1].occupied && [item.pos[0] + 1, item.pos[1] - 1]),
+                                (item.pos[0] >= 1 && board[item.pos[0] - 1][item.pos[1] - 1].occupied && [item.pos[0] - 1, item.pos[1] - 1]))
                     } else {
                         returnedValue.push
-                            ((item.pos[0] <= 6 && this.board[item.pos[0] + 1][item.pos[1] + 1].occupied && [item.pos[0] + 1, item.pos[1] + 1]),
-                                (item.pos[0] >= 1 && this.board[item.pos[0] - 1][item.pos[1] + 1].occupied && [item.pos[0] - 1, item.pos[1] + 1]))
+                            ((item.pos[0] <= 6 && board[item.pos[0] + 1][item.pos[1] + 1].occupied && [item.pos[0] + 1, item.pos[1] + 1]),
+                                (item.pos[0] >= 1 && board[item.pos[0] - 1][item.pos[1] + 1].occupied && [item.pos[0] - 1, item.pos[1] + 1]))
                     }
                 } else {
                     if (item.isWhite == 1) {
@@ -409,17 +413,51 @@ class Game {
         }
 
         if (item.type == 0 && returnType == "av") {
-            returnedValue = returnedValue.filter((elm) => this.checkKingMoves(item.isWhite, elm).length == 0)
+            returnedValue = returnedValue.filter((elm) => {
+                const sentPieces = this.cloneArray(pieces) ;
+                const sentBoard = this.cloneArray(board);
+                const pieceInd = sentPieces.findIndex(elmt => elmt && elmt.id == item.id);
+
+                sentBoard[elm[0]][elm[1]].occupied = true;
+                sentBoard[elm[0]][elm[1]].piece = { isWhite: item.isWhite, id: item.id }                    
+                sentBoard[item.pos[0]][item.pos[1]].occupied = false;
+                sentBoard[item.pos[0]][item.pos[1]].piece =null 
+
+                pieces[pieceInd].pos =elm 
+
+                return (this.checkKingMoves(item.isWhite, sentPieces , sentBoard)).length == 0})
         }
-        let filterdValue = returnedValue.filter(itm => 0 <= itm[0] && itm[0] <= 7 && 0 <= itm[1] && itm[1] <= 7 && !(this.board[itm[0]][itm[1]].occupied && this.board[itm[0]][itm[1]].piece.isWhite == item.isWhite));
-        let namnamValues = filterdValue.filter(itm => this.board[itm[0]][itm[1]].occupied);
+        let filterdValue = returnedValue.filter(itm => 0 <= itm[0] && itm[0] <= 7 && 0 <= itm[1] && itm[1] <= 7 && !(board[itm[0]][itm[1]].occupied && board[itm[0]][itm[1]].piece.isWhite == item.isWhite));
+        let namnamValues = filterdValue.filter(itm => board[itm[0]][itm[1]].occupied);
 
         if (returnType == "av") {
+            if (this.check) {
+                filterdValue = filterdValue.filter(elm => {
+                    const parBoard = this.cloneArray(board);
+                    const parPieces = this.cloneArray(pieces)
+                    const pieceInd = parPieces.findIndex(elmt => elmt && elmt.id == item.id);
+
+                    parBoard[elm[0]][elm[1]].occupied = true;
+                    parBoard[elm[0]][elm[1]].piece = { isWhite: item.isWhite, id: item.id }                    
+                    parBoard[item.pos[0]][item.pos[1]].occupied = false;
+                    parBoard[item.pos[0]][item.pos[1]].piece =null 
+
+                    parPieces[pieceInd].pos =elm 
+                    console.log(this.checkKingMoves(item.isWhite   , parPieces , parBoard))
+                    if(this.checkKingMoves(item.isWhite , parPieces , parBoard).length == 0){
+
+                        return true
+                    }else{
+                        return false
+                    }
+                })
+                console.log(filterdValue)
+            }
             filterdValue.forEach(elm => !namnamValues.find(felm => elm[0] == felm[0] && elm[1] == felm[1]) && document.querySelector(`.row[id="${elm[0] + 1}"] .cell[id="${elm[1] + 1}"]`).classList.add("playable"))
             namnamValues.forEach(elm => document.querySelector(`.row[id="${elm[0] + 1}"] .cell[id="${elm[1] + 1}"]`).style = "background-color:red")
             return filterdValue
         } else {
-            return returnedValue.filter(itm => 0 <= itm[0] && itm[0] <= 7 && 0 <= itm[1] && itm[1] <= 7)
+            return namnamValues;
         }
     }
     setPlaceAsFull(arr, piece) {
@@ -461,14 +499,38 @@ class Game {
             piece: null
         }
     }
-    checkKingMoves(isWhite = 1, kingPos = [4, 5]) {
-        const pieces = this.pieces.filter(elm => elm && elm.isWhite != isWhite);
+    checkKingMoves(isWhite,  pieces = this.pieces, board = this.board) {
+        const enPieces = pieces.filter(elm => elm && elm.isWhite != isWhite);
+        const newPieces = this.cloneArray(pieces);
+        const king = newPieces.find(elm => elm && elm.type == 0 && elm.isWhite == isWhite)
+        let originalPos = king.pos
+        let newBoard = this.cloneArray(board)
         let finalResults = [];
-        for (let i of pieces) {
-            let avPoses = this.returnAv(i.id, "nam")
+        let kingPos = king.pos ;
+        newPieces[newPieces.findIndex(elm => elm && elm.type == 0 && elm.isWhite == isWhite)].pos = kingPos;
+
+        newBoard[originalPos[0]][originalPos[1]].occupied = false
+        newBoard[originalPos[0]][originalPos[1]].piece = null
+        newBoard[kingPos[0]][kingPos[1]].occupied = true
+        newBoard[kingPos[0]][kingPos[1]].piece = [king.id, king.isWhite]
+
+        for (let i of enPieces) {
+            let avPoses = this.returnAv(i.id, "nam", newPieces, newBoard)
             finalResults.push(avPoses.filter(posElm => posElm[0] == kingPos[0] && posElm[1] == kingPos[1]))
         }
+
         return finalResults.filter(elment => elment.length > 0)
+    }
+    cloneArray(arr) {
+        const fakeArr = [];
+        for (let i = 0; i < arr.length; i++) {
+            if (Array.isArray(arr[i])) {
+                fakeArr[i] = this.cloneArray(arr[i]);
+            } else {
+                fakeArr[i] = { ...arr[i] }
+            }
+        }
+        return fakeArr
     }
 }
 
