@@ -1,7 +1,7 @@
 let piecesData = [
     { id: "wk", code: 0, img: "wk.png", isWhite: 1, dpos: [3, 4], count: 1 },
-    { id: "wq", code: 1, img: "wq.png", isWhite: 1, dpos: [3, 7], count: 1 },
-    { id: "wkn", code: 2, img: "wkn.png", isWhite: 1, dpos: [[1, 7], [6, 7]], count: 2 },
+    { id: "wq", code: 1, img: "wq.png", isWhite: 1, dpos: [4, 4], count: 1 },
+    { id: "wkn", code: 2, img: "wkn.png", isWhite: 1, dpos: [[5, 5], [6, 7]], count: 2 },
     { id: "wb", code: 3, img: "wb.png", isWhite: 1, dpos: [[2, 7], [5, 7]], count: 2 },
     { id: "wr", code: 4, img: "wr.png", isWhite: 1, dpos: [[0, 7], [7, 7]], count: 2 },
     { id: "wp", code: 5, img: "wp.png", isWhite: 1, dpos: 6, count: 8 },
@@ -113,13 +113,14 @@ class Game {
         } else {
             document.querySelector(".board").classList.add("blackTurn")
         }
-        if(this.checkKingMoves(this.isWhiteTurn )){
-            this.check= true
+        if (this.checkKingMoves(this.isWhiteTurn)) {
+            this.check = true
         }
     }
 
     returnAv(id, returnType, pieces = this.pieces, board = this.board) {
         let item = pieces.find(e => e && e.id == id)
+
         let returnedValue = [];
         let leftTopSideFull = false;
         let leftBottomSideFull = false;
@@ -412,51 +413,51 @@ class Game {
                 break;
         }
 
-        if (item.type == 0 && returnType == "av") {
-            returnedValue = returnedValue.filter((elm) => {
-                const sentPieces = this.cloneArray(pieces) ;
-                const sentBoard = this.cloneArray(board);
-                const pieceInd = sentPieces.findIndex(elmt => elmt && elmt.id == item.id);
-
-                sentBoard[elm[0]][elm[1]].occupied = true;
-                sentBoard[elm[0]][elm[1]].piece = { isWhite: item.isWhite, id: item.id }                    
-                sentBoard[item.pos[0]][item.pos[1]].occupied = false;
-                sentBoard[item.pos[0]][item.pos[1]].piece =null 
-
-                pieces[pieceInd].pos =elm 
-
-                return (this.checkKingMoves(item.isWhite, sentPieces , sentBoard)).length == 0})
-        }
+        
+        
         let filterdValue = returnedValue.filter(itm => 0 <= itm[0] && itm[0] <= 7 && 0 <= itm[1] && itm[1] <= 7 && !(board[itm[0]][itm[1]].occupied && board[itm[0]][itm[1]].piece.isWhite == item.isWhite));
-        let namnamValues = filterdValue.filter(itm => board[itm[0]][itm[1]].occupied);
-
         if (returnType == "av") {
+            if (item.type == 0 ) {
+                filterdValue = filterdValue.filter((elm) => {
+                    const sentPieces = this.cloneArray(pieces);
+                    const sentBoard = this.cloneArray(board);
+                    const pieceInd = sentPieces.findIndex(elmt => elmt && elmt.id == item.id);
+                    
+                    sentBoard[elm[0]][elm[1]].occupied = true;
+                    sentBoard[elm[0]][elm[1]].piece = { isWhite: item.isWhite, id: item.id }
+                    sentBoard[item.pos[0]][item.pos[1]].occupied = false;
+                    sentBoard[item.pos[0]][item.pos[1]].piece = null
+                    
+                    sentPieces[pieceInd].pos = elm
+                    
+                    return (this.checkKingMoves(item.isWhite, sentPieces, sentBoard)).length == 0
+                })
+            }
             if (this.check) {
                 filterdValue = filterdValue.filter(elm => {
                     const parBoard = this.cloneArray(board);
                     const parPieces = this.cloneArray(pieces)
                     const pieceInd = parPieces.findIndex(elmt => elmt && elmt.id == item.id);
-
+                    
                     parBoard[elm[0]][elm[1]].occupied = true;
-                    parBoard[elm[0]][elm[1]].piece = { isWhite: item.isWhite, id: item.id }                    
+                    parBoard[elm[0]][elm[1]].piece = { isWhite: item.isWhite, id: item.id }
                     parBoard[item.pos[0]][item.pos[1]].occupied = false;
-                    parBoard[item.pos[0]][item.pos[1]].piece =null 
-
-                    parPieces[pieceInd].pos =elm 
-                    console.log(this.checkKingMoves(item.isWhite   , parPieces , parBoard))
-                    if(this.checkKingMoves(item.isWhite , parPieces , parBoard).length == 0){
-
+                    parBoard[item.pos[0]][item.pos[1]].piece = null
+                    
+                    parPieces[pieceInd].pos = elm
+                    if (this.checkKingMoves(item.isWhite, parPieces, parBoard).length == 0) {
                         return true
-                    }else{
+                    } else {
                         return false
                     }
                 })
-                console.log(filterdValue)
             }
+            let namnamValues = filterdValue.filter(itm => board[itm[0]][itm[1]].occupied);
             filterdValue.forEach(elm => !namnamValues.find(felm => elm[0] == felm[0] && elm[1] == felm[1]) && document.querySelector(`.row[id="${elm[0] + 1}"] .cell[id="${elm[1] + 1}"]`).classList.add("playable"))
             namnamValues.forEach(elm => document.querySelector(`.row[id="${elm[0] + 1}"] .cell[id="${elm[1] + 1}"]`).style = "background-color:red")
             return filterdValue
         } else {
+            let namnamValues = filterdValue.filter(itm => board[itm[0]][itm[1]].occupied);
             return namnamValues;
         }
     }
@@ -499,14 +500,14 @@ class Game {
             piece: null
         }
     }
-    checkKingMoves(isWhite,  pieces = this.pieces, board = this.board) {
+    checkKingMoves(isWhite, pieces = this.pieces, board = this.board) {
         const enPieces = pieces.filter(elm => elm && elm.isWhite != isWhite);
         const newPieces = this.cloneArray(pieces);
         const king = newPieces.find(elm => elm && elm.type == 0 && elm.isWhite == isWhite)
         let originalPos = king.pos
         let newBoard = this.cloneArray(board)
         let finalResults = [];
-        let kingPos = king.pos ;
+        let kingPos = king.pos;
         newPieces[newPieces.findIndex(elm => elm && elm.type == 0 && elm.isWhite == isWhite)].pos = kingPos;
 
         newBoard[originalPos[0]][originalPos[1]].occupied = false
