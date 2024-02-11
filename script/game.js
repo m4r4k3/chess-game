@@ -81,29 +81,29 @@ class Game {
                 (e) =>
                     ((e.id % 2 != 0 && e.parentElement.id % 2 == 0) ||
                         (e.id % 2 == 0 && e.parentElement.id % 2 != 0)) &&
-                    e.classList.add("blackCell")
-            );
-        this.initializeBoard();
-    }
-    initializeBoard() {
-        document.querySelectorAll(".cell").forEach(elm => { elm.addEventListener("dragover", (e) => { e.preventDefault() }) })
-        document.querySelectorAll(".cell").forEach(elmt => elmt.addEventListener("drop", (event) => { this.piecePlay(event) }))
-        this.update()
-    }
-
-    update() {
-        this.playable = null
-        document.querySelectorAll(".cell").forEach((elm) => elm.innerHTML = "")
-        this.pieces.forEach((elm) => {
-            if (elm) {
-            document.querySelector(`.row[id='${elm.pos[0] + 1}'] .cell[id='${elm.pos[1] + 1}']`).innerHTML = ` <img class="piece" id="${elm.id}" draggable="true" src="./images/${elm.img}"/>`
-        }
-    })
-    document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragend", () => document.querySelectorAll(".cell").forEach(elm => { elm.style = ""; elm.classList.remove("playable") })))
-    document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragstart", (e) => {
-        if (this.pieces.find(elmnt => elmnt && elmnt.id == elm.id && elmnt.isWhite === this.isWhiteTurn)) {
-            this.playable = this.returnAv(elm.id, "av");
-            e.dataTransfer.clearData();
+                        e.classList.add("blackCell")
+                        );
+                        this.initializeBoard();
+                    }
+                    initializeBoard() {
+                        document.querySelectorAll(".cell").forEach(elm => { elm.addEventListener("dragover", (e) => { e.preventDefault() }) })
+                        document.querySelectorAll(".cell").forEach(elmt => elmt.addEventListener("drop", (event) => { this.piecePlay(event) }))
+                        this.update()
+                    }
+                    
+                    update() {
+                        this.playable = null
+                        document.querySelectorAll(".cell").forEach((elm) => elm.innerHTML = "")
+                        this.pieces.forEach((elm) => {
+                            if (elm) {
+                                document.querySelector(`.row[id='${elm.pos[0] + 1}'] .cell[id='${elm.pos[1] + 1}']`).innerHTML = ` <img class="piece" id="${elm.id}" draggable="true" src="./images/${elm.img}"/>`
+                            }
+                        })
+                        document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragend", () => document.querySelectorAll(".cell").forEach(elm => { elm.style = ""; elm.classList.remove("playable") })))
+                        document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragstart", (e) => {
+                            if (this.pieces.find(elmnt => elmnt && elmnt.id == elm.id && elmnt.isWhite === this.isWhiteTurn)) {
+                                this.playable = this.returnAv(elm.id, "av");
+                                e.dataTransfer.clearData();
             e.dataTransfer.setData("text/plain", elm.id)
         }
     }))
@@ -120,7 +120,6 @@ class Game {
 
 returnAv(id, returnType, pieces = this.pieces, board = this.board) {
     let item = pieces.find(e => e && e.id == id)
-
     let returnedValue = [];
     let leftTopSideFull = false;
     let leftBottomSideFull = false;
@@ -162,76 +161,76 @@ returnAv(id, returnType, pieces = this.pieces, board = this.board) {
                 returnedValue.push([item.pos[0] - 2, item.pos[1]])
             }
             break;
-        case 1:
-            for (let i = 1; i < 8; i++) {
-                if (!leftTopSideFull) {
-                    returnedValue.push(
-                        [item.pos[0] - i, item.pos[1] - i],
-                    )
-                    try {
-                        if (board[item.pos[0] - i][item.pos[1] - i].occupied) {
-                            throw ("empty")
+            case 1:
+                for (let i = 1; i < 8; i++) {
+                    if (!leftTopSideFull) {
+                        returnedValue.push(
+                            [item.pos[0] - i, item.pos[1] - i],
+                            )
+                            try {
+                                if (board[item.pos[0] - i][item.pos[1] - i].occupied) {
+                                    throw ("empty")
+                                }
+                            } catch {
+                                leftTopSideFull = true
+                            }
                         }
-                    } catch {
-                        leftTopSideFull = true
-                    }
-                }
-                if (!leftBottomSideFull) {
-                    returnedValue.push(
-                        [item.pos[0] - i, item.pos[1] + i],
-                    )
-                    try {
-                        if (board[item.pos[0] - i][item.pos[1] + i].occupied) {
-                            throw ("empty")
-                        }
-                    } catch {
+                        if (!leftBottomSideFull) {
+                            returnedValue.push(
+                                [item.pos[0] - i, item.pos[1] + i],
+                                )
+                                try {
+                                    if (board[item.pos[0] - i][item.pos[1] + i].occupied) {
+                                        throw ("empty")
+                                    }
+                                } catch {
                         leftBottomSideFull = true
                     }
                 }
                 if (!topFull) {
                     returnedValue.push(
                         [item.pos[0], item.pos[1] - i],
-                    )
-                    try {
-                        if (board[item.pos[0]][item.pos[1] - i].occupied) {
-                            throw ("empty")
+                        )
+                        try {
+                            if (board[item.pos[0]][item.pos[1] - i].occupied) {
+                                throw ("empty")
+                            }
+                        } catch {
+                            topFull = true
                         }
-                    } catch {
-                        topFull = true
                     }
-                }
-
-                if (!bottomFull) {
-                    returnedValue.push(
-                        [item.pos[0], item.pos[1] + i],
-                    )
-                    try {
-                        if (board[item.pos[0]][item.pos[1] + i].occupied) {
-                            throw ("empty")
-                        }
+                    
+                    if (!bottomFull) {
+                        returnedValue.push(
+                            [item.pos[0], item.pos[1] + i],
+                            )
+                            try {
+                                if (board[item.pos[0]][item.pos[1] + i].occupied) {
+                                    throw ("empty")
+                                }
                     } catch {
                         bottomFull = true
                     }
                 }
-
+                
                 if (!rightBottomSideFull) {
                     returnedValue.push(
                         [item.pos[0] + i, item.pos[1] + i],
-                    )
-                    try {
-                        if (board[item.pos[0] + i][item.pos[1] + i].occupied) {
-                            throw ("empty")
+                        )
+                        try {
+                            if (board[item.pos[0] + i][item.pos[1] + i].occupied) {
+                                throw ("empty")
+                            }
+                        } catch {
+                            rightBottomSideFull = true
                         }
-                    } catch {
-                        rightBottomSideFull = true
                     }
-                }
-                if (!rightTopSideFull) {
-                    returnedValue.push(
-                        [item.pos[0] + i, item.pos[1] - i],
-                    )
-                    try {
-                        if (board[item.pos[0] + i][item.pos[1] - i].occupied) {
+                    if (!rightTopSideFull) {
+                        returnedValue.push(
+                            [item.pos[0] + i, item.pos[1] - i],
+                            )
+                            try {
+                                if (board[item.pos[0] + i][item.pos[1] - i].occupied) {
                             throw ("empty")
                         }
                     } catch {
@@ -240,9 +239,9 @@ returnAv(id, returnType, pieces = this.pieces, board = this.board) {
                 } if (!leftFull) {
                     returnedValue.push(
                         [item.pos[0] - i, item.pos[1]],
-                    )
-                    try {
-                        if (board[item.pos[0] - i][item.pos[1]].occupied) {
+                        )
+                        try {
+                            if (board[item.pos[0] - i][item.pos[1]].occupied) {
                             throw ("empty")
                         }
                     } catch {
@@ -251,10 +250,10 @@ returnAv(id, returnType, pieces = this.pieces, board = this.board) {
                 } if (!rightFull) {
                     returnedValue.push(
                         [item.pos[0] + i, item.pos[1]],
-                    )
-                    try {
-                        if (board[item.pos[0] + i][item.pos[1]].occupied) {
-                            throw ("empty")
+                        )
+                        try {
+                            if (board[item.pos[0] + i][item.pos[1]].occupied) {
+                                throw ("empty")
                         }
                     } catch {
                         rightFull = true
@@ -262,34 +261,34 @@ returnAv(id, returnType, pieces = this.pieces, board = this.board) {
                 }
             }
             break;
-        case 2:
-            returnedValue.push(
-                [item.pos[0] - 2, item.pos[1] - 1],
-                [item.pos[0] - 2, item.pos[1] + 1],
-                [item.pos[0] + 2, item.pos[1] + 1],
-                [item.pos[0] + 2, item.pos[1] - 1],
-                [item.pos[0] + 1, item.pos[1] - 2],
-                [item.pos[0] - 1, item.pos[1] - 2],
-                [item.pos[0] - 1, item.pos[1] + 2],
-                [item.pos[0] + 1, item.pos[1] + 2]
-            )
-            break;
-        case 3:
-            for (let i = 1; i < 8; i++) {
-                if (!leftTopSideFull) {
-                    returnedValue.push(
-                        [item.pos[0] - i, item.pos[1] - i],
+            case 2:
+                returnedValue.push(
+                    [item.pos[0] - 2, item.pos[1] - 1],
+                    [item.pos[0] - 2, item.pos[1] + 1],
+                    [item.pos[0] + 2, item.pos[1] + 1],
+                    [item.pos[0] + 2, item.pos[1] - 1],
+                    [item.pos[0] + 1, item.pos[1] - 2],
+                    [item.pos[0] - 1, item.pos[1] - 2],
+                    [item.pos[0] - 1, item.pos[1] + 2],
+                    [item.pos[0] + 1, item.pos[1] + 2]
                     )
-                    try {
-                        if (board[item.pos[0] - i][item.pos[1] - i].occupied) {
-                            throw ("empty")
-                        }
-                    } catch {
-                        leftTopSideFull = true
-                    }
-                }
-                if (!leftBottomSideFull) {
-                    returnedValue.push(
+                    break;
+                    case 3:
+                        for (let i = 1; i < 8; i++) {
+                            if (!leftTopSideFull) {
+                                returnedValue.push(
+                                    [item.pos[0] - i, item.pos[1] - i],
+                                    )
+                                    try {
+                                        if (board[item.pos[0] - i][item.pos[1] - i].occupied) {
+                                            throw ("empty")
+                                        }
+                                    } catch {
+                                        leftTopSideFull = true
+                                    }
+                                }
+                                if (!leftBottomSideFull) {
+                                    returnedValue.push(
                         [item.pos[0] - i, item.pos[1] + i],
                     )
                     try {
@@ -315,112 +314,112 @@ returnAv(id, returnType, pieces = this.pieces, board = this.board) {
                 if (!rightTopSideFull) {
                     returnedValue.push(
                         [item.pos[0] + i, item.pos[1] - i],
-                    )
-                    try {
-                        if (board[item.pos[0] + i][item.pos[1] - i].occupied) {
-                            throw ("empty")
+                        )
+                        try {
+                            if (board[item.pos[0] + i][item.pos[1] - i].occupied) {
+                                throw ("empty")
+                            }
+                        } catch {
+                            rightTopSideFull = true
                         }
-                    } catch {
-                        rightTopSideFull = true
                     }
                 }
-            }
-            break;
-        case 4:
-            for (let i = 1; i < 8; i++) {
-                if (!topFull) {
-                    returnedValue.push(
-                        [item.pos[0], item.pos[1] - i],
-                    )
-                    try {
-                        if (board[item.pos[0]][item.pos[1] - i].occupied) {
-                            throw ("empty")
-                        }
-                    } catch {
-                        topFull = true
-                    }
+                break;
+                case 4:
+                    for (let i = 1; i < 8; i++) {
+                        if (!topFull) {
+                            returnedValue.push(
+                                [item.pos[0], item.pos[1] - i],
+                                )
+                                try {
+                                    if (board[item.pos[0]][item.pos[1] - i].occupied) {
+                                        throw ("empty")
+                                    }
+                                } catch {
+                                    topFull = true
+                                }
                 }
                 if (!bottomFull) {
                     returnedValue.push(
                         [item.pos[0], item.pos[1] + i],
-                    )
-                    try {
-                        if (board[item.pos[0]][item.pos[1] + i].occupied) {
-                            throw ("empty")
+                        )
+                        try {
+                            if (board[item.pos[0]][item.pos[1] + i].occupied) {
+                                throw ("empty")
+                            }
+                        } catch {
+                            bottomFull = true
                         }
-                    } catch {
-                        bottomFull = true
                     }
-                }
                 if (!leftFull) {
                     returnedValue.push(
                         [item.pos[0] - i, item.pos[1]],
-                    )
-                    try {
-                        if (board[item.pos[0] - i][item.pos[1]].occupied) {
-                            throw ("empty")
+                        )
+                        try {
+                            if (board[item.pos[0] - i][item.pos[1]].occupied) {
+                                throw ("empty")
+                            }
+                        } catch {
+                            leftFull = true
                         }
-                    } catch {
-                        leftFull = true
-                    }
-                } if (!rightFull) {
-                    returnedValue.push(
-                        [item.pos[0] + i, item.pos[1]],
-                    )
-                    try {
-                        if (board[item.pos[0] + i][item.pos[1]].occupied) {
-                            throw ("empty")
-                        }
-                    } catch {
-                        rightFull = true
-                    }
+                    } if (!rightFull) {
+                        returnedValue.push(
+                            [item.pos[0] + i, item.pos[1]],
+                            )
+                            try {
+                                if (board[item.pos[0] + i][item.pos[1]].occupied) {
+                                    throw ("empty")
+                                }
+                            } catch {
+                                rightFull = true
+                            }
                 }
             }
             break;
-        case 5:
-            if (returnType == "av") {
-                if (!board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied) {
-                    returnedValue.push(
-                        [item.pos[0], item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1]
-                    )
-                }
-                if (!item.firstMove && !board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied && !board[item.pos[0]][item.isWhite ? item.pos[1] - 2 : item.pos[1] + 2].occupied) {
-                    returnedValue.push(
+            case 5:
+                if (returnType == "av") {
+                    if (!board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied) {
+                        returnedValue.push(
+                            [item.pos[0], item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1]
+                            )
+                        }
+                        if (!item.firstMove && !board[item.pos[0]][item.isWhite ? item.pos[1] - 1 : item.pos[1] + 1].occupied && !board[item.pos[0]][item.isWhite ? item.pos[1] - 2 : item.pos[1] + 2].occupied) {
+                            returnedValue.push(
                         [item.pos[0], item.isWhite ? item.pos[1] - 2 : item.pos[1] + 2]
                     )
                 }
                 if (item.isWhite == 1) {
-
+                    
                     returnedValue.push
-                        ((item.pos[0] <= 6 && board[item.pos[0] + 1][item.pos[1] - 1].occupied && [item.pos[0] + 1, item.pos[1] - 1]),
-                            (item.pos[0] >= 1 && board[item.pos[0] - 1][item.pos[1] - 1].occupied && [item.pos[0] - 1, item.pos[1] - 1]))
+                    ((item.pos[0] <= 6 && board[item.pos[0] + 1][item.pos[1] - 1].occupied && [item.pos[0] + 1, item.pos[1] - 1]),
+                    (item.pos[0] >= 1 && board[item.pos[0] - 1][item.pos[1] - 1].occupied && [item.pos[0] - 1, item.pos[1] - 1]))
                 } else {
                     returnedValue.push
-                        ((item.pos[0] <= 6 && board[item.pos[0] + 1][item.pos[1] + 1].occupied && [item.pos[0] + 1, item.pos[1] + 1]),
-                            (item.pos[0] >= 1 && board[item.pos[0] - 1][item.pos[1] + 1].occupied && [item.pos[0] - 1, item.pos[1] + 1]))
+                    ((item.pos[0] <= 6 && board[item.pos[0] + 1][item.pos[1] + 1].occupied && [item.pos[0] + 1, item.pos[1] + 1]),
+                    (item.pos[0] >= 1 && board[item.pos[0] - 1][item.pos[1] + 1].occupied && [item.pos[0] - 1, item.pos[1] + 1]))
                 }
             } else {
                 if (item.isWhite == 1) {
                     returnedValue.push
-                        ((item.pos[0] <= 6 && [item.pos[0] + 1, item.pos[1] - 1]),
-                            (item.pos[0] >= 1 && [item.pos[0] - 1, item.pos[1] - 1]))
+                    ((item.pos[0] <= 6 && [item.pos[0] + 1, item.pos[1] - 1]),
+                    (item.pos[0] >= 1 && [item.pos[0] - 1, item.pos[1] - 1]))
                 } else {
                     returnedValue.push
-                        ((item.pos[0] <= 6 && [item.pos[0] + 1, item.pos[1] + 1]),
-                            (item.pos[0] >= 1 && [item.pos[0] - 1, item.pos[1] + 1]))
+                    ((item.pos[0] <= 6 && [item.pos[0] + 1, item.pos[1] + 1]),
+                    (item.pos[0] >= 1 && [item.pos[0] - 1, item.pos[1] + 1]))
                 }
             }
             break;
-    }
-
-    
-    
-    let filterdValue = returnedValue.filter(itm => 0 <= itm[0] && itm[0] <= 7 && 0 <= itm[1] && itm[1] <= 7 && !(board[itm[0]][itm[1]].occupied && board[itm[0]][itm[1]].piece.isWhite == item.isWhite));
-    if (returnType == "av") {
-        if (item.type == 0 ) {
-            filterdValue = filterdValue.filter((elm) => {
-                const sentPieces = this.cloneArray(pieces);
-                const sentBoard = this.cloneArray(board);
+        }
+        
+        
+        
+        let filterdValue = returnedValue.filter(itm => 0 <= itm[0] && itm[0] <= 7 && 0 <= itm[1] && itm[1] <= 7 && !(board[itm[0]][itm[1]].occupied && board[itm[0]][itm[1]].piece.isWhite == item.isWhite));
+        if (returnType == "av") {
+            if (item.type == 0 ) {
+                filterdValue = filterdValue.filter((elm) => {
+                    const sentPieces = this.cloneArray(pieces);
+                    const sentBoard = this.cloneArray(board);
                 const pieceInd = sentPieces.findIndex(elmt => elmt && elmt.id == item.id);
                 
                 sentBoard[elm[0]][elm[1]].occupied = true;
@@ -438,6 +437,8 @@ returnAv(id, returnType, pieces = this.pieces, board = this.board) {
                 const parBoard = this.cloneArray(board);
                 const parPieces = this.cloneArray(pieces)
                 const pieceInd = parPieces.findIndex(elmt => elmt && elmt.id == item.id);
+                const eatenPiece = parPieces.findIndex(elmt=>elmt  && elmt.pos[0] == elm[0] && elmt.pos[1] == elm[1] && elmt.isWhite != this.isWhiteTurn) 
+                if(eatenPiece != -1 ) parPieces[eatenPiece] = null
                 
                 parBoard[elm[0]][elm[1]].occupied = true;
                 parBoard[elm[0]][elm[1]].piece = { isWhite: item.isWhite, id: item.id }
@@ -447,7 +448,6 @@ returnAv(id, returnType, pieces = this.pieces, board = this.board) {
                     if (this.checkKingMoves(item.isWhite, parPieces, parBoard).length == 0) {
                         return true
                     } else {
-                        elm[0]  == 4 && elm[1] == 3 && console.log(this.checkKingMoves(item.isWhite, parPieces, parBoard))
                         return false
                     }
                 })
@@ -528,7 +528,7 @@ returnAv(id, returnType, pieces = this.pieces, board = this.board) {
             if (Array.isArray(arr[i])) {
                 fakeArr[i] = this.cloneArray(arr[i]);
             } else {
-                fakeArr[i] = { ...arr[i] }
+                fakeArr[i] =arr[i] ?{ ...arr[i] }:arr[i]
             }
         }
         return fakeArr
