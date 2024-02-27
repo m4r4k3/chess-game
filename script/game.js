@@ -1,14 +1,14 @@
 let piecesData = [
-    { id: "wk", code: 0, img: "wk.png", isWhite: 1, dpos: [7, 4], count: 1 },
+    { id: "wk", code: 0, img: "wk.png", isWhite: 1, dpos: [3, 7], count: 1 },
     { id: "wq", code: 1, img: "wq.png", isWhite: 1, dpos: [4, 7], count: 1 },
     { id: "wkn", code: 2, img: "wkn.png", isWhite: 1, dpos: [[1, 7], [6, 7]], count: 2 },
     { id: "wb", code: 3, img: "wb.png", isWhite: 1, dpos: [[2, 7], [5, 7]], count: 2 },
     { id: "wr", code: 4, img: "wr.png", isWhite: 1, dpos: [[0, 7], [7, 7]], count: 2 },
     { id: "wp", code: 5, img: "wp.png", isWhite: 1, dpos: 6, count: 8 },
-    { id: "bk", code: 0, img: "bk.png", isWhite: 0, dpos: [4, 0], count: 1 },
-    { id: "bq", code: 1, img: "bq.png", isWhite: 0, dpos: [5, 3], count: 1 },
+    { id: "bk", code: 0, img: "bk.png", isWhite: 0, dpos: [3, 0], count: 1 },
+    { id: "bq", code: 1, img: "bq.png", isWhite: 0, dpos: [4, 0], count: 1 },
     { id: "bkn", code: 2, img: "bkn.png", isWhite: 0, dpos: [[1, 0], [6, 0]], count: 2 },
-    { id: "bb", code: 3, img: "bb.png", isWhite: 0, dpos: [[4, 2], [5, 0]], count: 2 },
+    { id: "bb", code: 3, img: "bb.png", isWhite: 0, dpos: [[2, 0], [5, 0]], count: 2 },
     { id: "br", code: 4, img: "br.png", isWhite: 0, dpos: [[0, 0], [7, 0]], count: 2 },
     { id: "bp", code: 5, img: "bp.png", isWhite: 0, dpos: 1, count: 8 },
 ];
@@ -94,22 +94,23 @@ class Game {
     }
 
     update() {
-        if (!this.checkMate) {
-            this.playable = null
-            document.querySelectorAll(".cell").forEach((elm) => elm.innerHTML = "")
-            this.pieces.forEach((elm) => {
-                if (elm) {
-                    document.querySelector(`.row[id='${elm.pos[0] + 1}'] .cell[id='${elm.pos[1] + 1}']`).innerHTML = ` <img class="piece" id="${elm.id}" draggable="true" src="./images/${elm.img}"/>`
-                }
-            })
-            document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragend", () => document.querySelectorAll(".cell").forEach(elm => { elm.style = ""; elm.classList.remove("playable") })))
-            document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragstart", (e) => {
+        this.playable = null
+        const dragendFunc = () => document.querySelectorAll(".cell").forEach(elm => { elm.style = ""; elm.classList.remove("playable")})
+        const dragStartFunc = (e , elm) => {
                 if (this.pieces.find(elmnt => elmnt && elmnt.id == elm.id && elmnt.isWhite === this.isWhiteTurn)) {
                     this.playable = this.returnAv(elm.id, "av");
                     e.dataTransfer.clearData();
                     e.dataTransfer.setData("text/plain", elm.id)
                 }
-            }))
+            }
+        document.querySelectorAll(".cell").forEach((elm) => elm.innerHTML = "")
+        this.pieces.forEach((elm) => {
+            if (elm) {
+                document.querySelector(`.row[id='${elm.pos[0] + 1}'] .cell[id='${elm.pos[1] + 1}']`).innerHTML = ` <img class="piece" id="${elm.id}" draggable="true" src="./images/${elm.img}"/>`
+                }
+            })
+            document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragend",dragendFunc))
+            document.querySelectorAll(".piece").forEach(elm => elm.addEventListener("dragstart",(e)=>dragStartFunc(e , elm)))
             this.pieces.forEach(arr => arr && this.setPlaceAsFull(arr.pos, { isWhite: arr.isWhite, id: arr.id }))
             if (this.isWhiteTurn) {
                 document.querySelector(".board").classList.remove("blackTurn")
@@ -122,14 +123,16 @@ class Game {
                 this.check = true
                 this.checkCheckMate()
             }
-        } else {
-            const events = ["dragend" , "dragstart"]
-            document.querySelectorAll(".piece").forEach(elm=>events.forEach(event=>elm.removeEventListener(event)))
+            if (this.checkMate) {
+            const events = [{event:"dragend" , func:dragendFunc}, {event:"dragstart" , func:(e)=>dragStartFunc(e)}]
+            document.querySelectorAll(".piece").forEach((elm)=>elm.setAttribute("draggable" ,"false"))
+            document.querySelectorAll(".piece").forEach(elm=>events.forEach(obj=>elm.removeEventListener(obj.event , obj.func)))
             this.pieces.filter(elm=>elm && elm.isWhite == this.isWhiteLoser).forEach(
                 (elmnt)=>{
-                     document.querySelector(`.row[id='${elmnt.pos[0] + 1}'] .cell[id='${elmnt.pos[1] + 1}']`).style.backgroundColor = "red"
+                     document.querySelector(`.row[id='${elmnt.pos[0] + 1}'] .cell[id='${elmnt.pos[1] + 1}']`).classList.add("end")
                 }
             )
+            document.querySelector("h1").innerHTML = this.isWhiteLoser ?"Black won" :"White won"
         }
     }
 
@@ -543,7 +546,8 @@ class Game {
             for (let i of coloredPieces) {
                 avMoves.push(this.returnAv(i.id, "av"))
             }
-            if (avMoves.length === 0) {
+            
+            if (avMoves.filter(elm=>elm.length).length === 0) {
                 this.checkMate = true;
                 this.isWhiteLoser = this.isWhiteTurn
             }

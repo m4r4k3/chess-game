@@ -61,3 +61,7 @@ font-size: 30px;
 .blackTurn .piece{
     transform: rotateX(180deg) ;
 }
+.end {
+    background-color: rgb(165, 165, 165);
+    box-shadow:  0 0 10px black inset;
+}
